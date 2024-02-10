@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
@@ -23,6 +24,9 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((context, config) =>
     {
+        config.Host(builder.Configuration["RabbitMq:Host"], "/", host => host.Username(builder.Configuration.GetValue("RabbitMQ:Username", "guest")));
+        config.Host(builder.Configuration["RabbitMq:Host"], "/", host => host.Password(builder.Configuration.GetValue("RabbitMQ:Password", "guest")));
+
         config.ReceiveEndpoint("search-auction-created", e =>
         {
             e.UseMessageRetry(r => r.Interval(5, 5));
